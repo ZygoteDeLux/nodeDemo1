@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
+let currentID = 3;
+
 const mountains = [
     { id: 1, name: 'Mount Everest', height: 8848 },
     { id: 2, name: 'K2', height: 8611 },
@@ -31,10 +35,14 @@ app.get("/mountains/:id", (req, res) => {
 //?id=?&name=Himmelbjerget&height=147
 
 
+/*
+
 app.post("/mountains", (req, res) => {
 
   //deconstruct query
   const { id, name, height } = req.query; 
+
+
 
     if (id && name && height) {
 
@@ -59,8 +67,22 @@ app.post("/mountains", (req, res) => {
   }
 
 });
+*/
 
 
+
+app.post("/mountains", (req, res) => {
+
+  console.log(req.body);
+  const newMountain = req.body;
+  newMountain.id = ++currentID;
+  mountains.push(newMountain);
+
+  res.send({data: newMountain});
+
+});
+
+/*
 app.patch("/mountains", (req, res) => {
 
   //deconstruct query
@@ -97,6 +119,8 @@ app.patch("/mountains", (req, res) => {
   
 });
 
+
+
 app.delete("/mountains", (req, res) => {
 
   //deconstruct query
@@ -124,7 +148,35 @@ app.delete("/mountains", (req, res) => {
   }
 });
 
+*/
+app.patch("/mountains/:id", (req, res) =>{
 
+  let foundIndex = mountains.findIndex((mountain) => mountain.id === Number(req.params.id));
+
+  if(foundIndex === -1){
+    res.status(404).send({error: "could not find mountain by id"});
+  }else{
+
+    mountains[foundIndex] = {...mountains[foundIndex], ...req.body, id: Number(req.params.id)} ;
+
+    res.send({data: mountains[foundIndex]});
+  }
+
+ 
+});
+
+
+app.delete("/mountains/:id", (req, res) =>{
+
+  let foundIndex = mountains.findIndex((mountain) => mountain.id === Number(req.params.id))
+
+  if(foundIndex === -1){
+    res.send({error: "could not find mountain by id"})
+  }else {
+    mountains = mountains.splice(foundIndex, 1);
+    res.send({data: Number(req.params.id)});
+  }
+});
 
 const PORT = 8080;
 
